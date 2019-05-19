@@ -9,23 +9,23 @@ SYNOPSIS
     use Type::EnumHOW;
 
     constant Rank = do {
-      my Str @ranks   = 'Unranked', 'Voice', 'Half-Operator', 'Operator', 'Administrator', 'Owner';
-      my Str %symbols = %(
-          @ranks[0] => ' ',
-          @ranks[1] => '+',
-          @ranks[2] => '%',
-          @ranks[3] => '@',
-          @ranks[4] => '&',
-          @ranks[5] => '~'
-      );
-
-      my constant Rank = Type::EnumHOW.new_type: :name<Rank>, :base_type(Int);
-      Rank.^set_package: OUR;
-      Rank.^add_attribute_with_values: '$!symbol', %symbols, :type(Str);
-      Rank.^compose;
-      Rank.^add_enum_values: @ranks;
-      Rank.^compose_values;
-      Rank
+        my Str @ranks   = 'Unranked', 'Voice', 'Half-Operator', 'Operator', 'Administrator', 'Owner';
+        my Str %symbols = %(
+            @ranks[0] => ' ',
+            @ranks[1] => '+',
+            @ranks[2] => '%',
+            @ranks[3] => '@',
+            @ranks[4] => '&',
+            @ranks[5] => '~'
+        );
+      
+        my constant Rank = Type::EnumHOW.new_type: :name<Rank>, :base_type(Int);
+        Rank.^set_package: OUR;
+        Rank.^add_attribute_with_values: '$!symbol', %symbols, :type(Str);
+        Rank.^compose;
+        Rank.^add_enum_values: @ranks;
+        Rank.^compose_values;
+        Rank
     };
 
     say Rank::Owner;        # OUTPUT: Owner
