@@ -168,7 +168,7 @@ Returns the package set by C<^set_package>.
 =item B<^set_package>(I<$package> where *.WHO ~~ Stash | PseudoStash)
 
 Sets the package in which the enum and its values' symbols will be installed.
-This must be called before calling C<^compose> or C<^compose_values>.
+This must be called before calling C<^compose> or C<^add_enum_values>.
 
 =item B<^add_attribute_with_values>(str I<$name>, %values, Mu:U I<:$type> = Any, Bool I<:$private> = False)
 
@@ -188,10 +188,10 @@ If no package has been set using C<^set_package>, an
 C<X::Type::EnumHOW::MissingPackage> exception will be thrown.
 
 =item B<^add_enum_values>(I<%values>)
-=item B<^add_enum_values>(I<*@keys>)
+=item B<^add_enum_values>(I<@keys>)
 
 Batch adds a list of enum values to an enum and installs them both in the
-package set and the enum's package.. C<^compose> must be called before calling
+package set and the enum's package. C<^compose> must be called before calling
 this. Calling this with a hash will warn about the enum values' order not
 necessarily being the same as when they were defined in the hash. This may also
 be called with either a list of keys or a list of pairs.

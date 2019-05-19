@@ -53,7 +53,7 @@ Returns the package set by `^set_package`.
 
   * **^set_package**(*$package* where *.WHO ~~ Stash | PseudoStash)
 
-Sets the package in which the enum and its values' symbols will be installed. This must be called before calling `^compose` or `^compose_values`.
+Sets the package in which the enum and its values' symbols will be installed. This must be called before calling `^compose` or `^add_enum_values`.
 
   * **^add_attribute_with_values**(str *$name*, %values, Mu:U *:$type* = Any, Bool *:$private* = False)
 
@@ -67,9 +67,9 @@ If no package has been set using `^set_package`, an `X::Type::EnumHOW::MissingPa
 
   * **^add_enum_values**(*%values*)
 
-  * **^add_enum_values**(**@keys*)
+  * **^add_enum_values**(*@keys*)
 
-Batch adds a list of enum values to an enum and installs them both in the package set and the enum's package.. `^compose` must be called before calling this. Calling this with a hash will warn about the enum values' order not necessarily being the same as when they were defined in the hash. This may also be called with either a list of keys or a list of pairs.
+Batch adds a list of enum values to an enum and installs them both in the package set and the enum's package. `^compose` must be called before calling this. Calling this with a hash will warn about the enum values' order not necessarily being the same as when they were defined in the hash. This may also be called with either a list of keys or a list of pairs.
 
 If no package has been set using `^set_package`, an `X::Type::EnumHOW::MissingPackage` exception will be thrown.
 
