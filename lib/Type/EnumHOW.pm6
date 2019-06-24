@@ -8,6 +8,12 @@ class X::Type::EnumHOW::MissingPackage is Exception {
     }
 }
 
+class X::Type::EnumHOW::PostCompilationMY is Exception {
+    method message(--> Str) {
+        'Enum and enum value symbols can only be installed in MY during compilation. Use BEGIN or constant when declaring the enum.'
+    }
+}
+
 my subset StashLike where *.WHO ~~ Stash | PseudoStash;
 
 has Hash        %!attributes;
@@ -89,17 +95,27 @@ multi method add_enum_values(Mu $enum is raw, @keys --> Nil) {
     }
 }
 
+# If the given package is MY, installs a lexical symbol in the current lexpad,
+# otherwise installs the symbol directly in the given package.
 method !install-symbol(str $name, $value is raw --> Nil) {
     nqp::stmts(
       nqp::if(
         nqp::eqaddr(nqp::decont($!package), StashLike),
         (X::Type::EnumHOW::MissingPackage.new.throw)
       ),
-      ($!package.WHO{$name} := $value),
       (my $W := nqp::getlexdyn('$*W')),
       nqp::if(
-        nqp::defined($W),
-        ($W.add_object_if_no_sc($value))
+        nqp::iseq_s($!package.HOW.name($!package), 'MY'),
+        nqp::if(
+          nqp::isconcrete($W),
+          ($W.install_lexical_symbol: $W.cur_lexpad, $name, $value),
+          (X::Type::EnumHOW::PostCompilationMY.new.throw)
+        ),
+        ($!package.WHO{$name} := $value)
+      ),
+      nqp::if(
+        nqp::isconcrete($W),
+        ($W.add_object_if_no_sc: $value)
       )
     )
 }
@@ -124,7 +140,7 @@ Type::EnumHOW - Sugar for enum's meta-object protocol
             @ranks[4] => '&',
             @ranks[5] => '~'
         );
-  
+
         my constant Rank = Type::EnumHOW.new_type: :name<Rank>, :base_type(Int);
         Rank.^set_package: OUR;
         Rank.^add_attribute_with_values: '$!symbol', %symbols, :type(Str);
