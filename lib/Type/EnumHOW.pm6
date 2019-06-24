@@ -130,7 +130,7 @@ Type::EnumHOW - Sugar for enum's meta-object protocol
 
     use Type::EnumHOW;
 
-    constant Rank = do {
+    BEGIN {
         my Str @ranks   = 'Unranked', 'Voice', 'Half-Operator', 'Operator', 'Administrator', 'Owner';
         my Str %symbols = %(
             @ranks[0] => ' ',
@@ -147,11 +147,10 @@ Type::EnumHOW - Sugar for enum's meta-object protocol
         Rank.^compose;
         Rank.^add_enum_values: @ranks;
         Rank.^compose_values;
-        Rank
     };
 
-    say Rank::Owner;        # OUTPUT: Owner
-    say Rank::Owner.symbol; # OUTPUT: ~
+    say Owner;        # OUTPUT: Owner
+    say Owner.symbol; # OUTPUT: ~
 
 =head1 DESCRIPTION
 
@@ -186,6 +185,14 @@ Returns the package set by C<^set_package>.
 Sets the package in which the enum and its values' symbols will be installed.
 This must be called before calling C<^compose> or C<^add_enum_values>.
 
+If C<MY> is given, the enum must be created during compilation. Any other
+package can be used during runtime.
+
+Do not pass C<MY> packages in other lexpads to this method, such as
+C<OUTER::MY> or C<CALLER::MY>; enum and enum value symbols will get installed in
+the wrong lexpad. To the best of my knowledge, there isn't a good way to
+properly detect when they get passed when C<BEGIN>/C<constant> are involved.
+
 =item B<^add_attribute_with_values>(str I<$name>, %values, Mu:U I<:$type> = Any, Bool I<:$private> = False)
 
 Adds an attribute with the name C<$name> to the enum. C<%values> is a hash
@@ -203,6 +210,9 @@ before adding enum values.
 If no package has been set using C<^set_package>, an
 C<X::Type::EnumHOW::MissingPackage> exception will be thrown.
 
+If the package was set to C<MY> and this wasn't called during compilation, an
+C<X::Type::EnumHOW::PostCompilationMY> exception will be thrown.
+
 =item B<^add_enum_values>(I<%values>)
 =item B<^add_enum_values>(I<@keys>)
 
@@ -214,6 +224,9 @@ be called with either a list of keys or a list of pairs.
 
 If no package has been set using C<^set_package>, an
 C<X::Type::EnumHOW::MissingPackage> exception will be thrown.
+
+If the package was set to C<MY> and this wasn't called during compilation, an
+C<X::Type::EnumHOW::PostCompilationMY> exception will be thrown.
 
 =head1 AUTHOR
 

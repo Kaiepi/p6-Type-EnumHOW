@@ -10,7 +10,7 @@ SYNOPSIS
 
     use Type::EnumHOW;
 
-    constant Rank = do {
+    BEGIN {
         my Str @ranks   = 'Unranked', 'Voice', 'Half-Operator', 'Operator', 'Administrator', 'Owner';
         my Str %symbols = %(
             @ranks[0] => ' ',
@@ -20,18 +20,17 @@ SYNOPSIS
             @ranks[4] => '&',
             @ranks[5] => '~'
         );
-      
+
         my constant Rank = Type::EnumHOW.new_type: :name<Rank>, :base_type(Int);
         Rank.^set_package: OUR;
         Rank.^add_attribute_with_values: '$!symbol', %symbols, :type(Str);
         Rank.^compose;
         Rank.^add_enum_values: @ranks;
         Rank.^compose_values;
-        Rank
     };
 
-    say Rank::Owner;        # OUTPUT: Owner
-    say Rank::Owner.symbol; # OUTPUT: ~
+    say Owner;        # OUTPUT: Owner
+    say Owner.symbol; # OUTPUT: ~
 
 DESCRIPTION
 ===========
@@ -57,6 +56,10 @@ Returns the package set by `^set_package`.
 
 Sets the package in which the enum and its values' symbols will be installed. This must be called before calling `^compose` or `^add_enum_values`.
 
+If `MY` is given, the enum must be created during compilation. Any other package can be used during runtime.
+
+Do not pass `MY` packages in other lexpads to this method, such as `OUTER::MY` or `CALLER::MY`; enum and enum value symbols will get installed in the wrong lexpad. To the best of my knowledge, there isn't a good way to properly detect when they get passed when `BEGIN`/`constant` are involved.
+
   * **^add_attribute_with_values**(str *$name*, %values, Mu:U *:$type* = Any, Bool *:$private* = False)
 
 Adds an attribute with the name `$name` to the enum. `%values` is a hash of enum value keys to attribute values that is used to bind the attribute values to their respective enum values when calling `^compose_values`. `$type` is the type of the attribute values. If the attribute should be private, set `$private` to `True`, otherwise a getter will automatically be added.
@@ -67,6 +70,8 @@ Composes the enum type. Call this after adding enum attributes and methods, but 
 
 If no package has been set using `^set_package`, an `X::Type::EnumHOW::MissingPackage` exception will be thrown.
 
+If the package was set to `MY` and this wasn't called during compilation, an `X::Type::EnumHOW::PostCompilationMY` exception will be thrown.
+
   * **^add_enum_values**(*%values*)
 
   * **^add_enum_values**(*@keys*)
@@ -74,6 +79,8 @@ If no package has been set using `^set_package`, an `X::Type::EnumHOW::MissingPa
 Batch adds a list of enum values to an enum and installs them both in the package set and the enum's package. `^compose` must be called before calling this. Calling this with a hash will warn about the enum values' order not necessarily being the same as when they were defined in the hash. This may also be called with either a list of keys or a list of pairs.
 
 If no package has been set using `^set_package`, an `X::Type::EnumHOW::MissingPackage` exception will be thrown.
+
+If the package was set to `MY` and this wasn't called during compilation, an `X::Type::EnumHOW::PostCompilationMY` exception will be thrown.
 
 AUTHOR
 ======
